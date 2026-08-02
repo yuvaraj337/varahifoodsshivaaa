@@ -2,7 +2,6 @@ import "./globals.css";
 import type { Metadata } from "next";
 import { CartProvider } from "@/components/cart/CartContext";
 import { Toaster } from "react-hot-toast";
-<Toaster position="top-center" />
 
 export const metadata: Metadata = {
   title: "Varahi Eat & Fit",
