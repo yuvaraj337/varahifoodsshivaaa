@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import Image from "next/image";
 import toast from "react-hot-toast";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 import {
   ShoppingCart,
@@ -16,25 +18,57 @@ import {
 
 import { cn } from "@/lib/utils";
 import { useCart } from "@/components/cart/CartContext";
-import { categories, menuItems } from "@/data/menu";
+interface MenuItem {
+  id: number;
+  category: string;
+  name: string;
+  description: string;
+  price: number;
+  image: string;
+  rating: number;
+  calories: number;
+  protein: string;
+  isVegetarian: boolean;
+} 
 
 export default function MenuSection() {
   const { addToCart } = useCart();
 
-  const [activeCategory, setActiveCategory] =
-    useState("All");
+  const [activeCategory, setActiveCategory] = useState("All");
 
-  const [favorites, setFavorites] = useState<number[]>(
-    []
-  );
+const [favorites, setFavorites] = useState<number[]>([]);
+
+const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
+
+const categories = [
+  "All",
+  "Salads",
+  "Protein Shakes",
+  "Soups",
+  "Rolls",
+  "Eggs",
+];
 
   useEffect(() => {
-    const handleCategoryChange = (
-      event: Event
-    ) => {
-      const customEvent =
-        event as CustomEvent<string>;
+    const fetchMenu = async () => {
+      try {
+        const snapshot = await getDocs(collection(db, "menu"));
+        const foods = snapshot.docs.map((doc) => ({
+          ...(doc.data() as MenuItem),
+        }));
+        setMenuItems(foods);
+      } catch (error) {
+        console.error(error);
+        toast.error("Unable to load menu");
+      }
+    };
 
+    fetchMenu();
+  }, []);
+
+  useEffect(() => {
+    const handleCategoryChange = (event: Event) => {
+      const customEvent = event as CustomEvent<string>;
       setActiveCategory(customEvent.detail);
     };
 
